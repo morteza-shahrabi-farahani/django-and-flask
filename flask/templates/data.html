@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+   <head>
+      <style>
+         @media screen and (max-width: 1000px) {
+           img.img-fluid {
+             width: 100%;
+            }
+         }
+
+         .container {
+            padding: 10px;
+         }
+      </style>
+      <link rel="stylesheet" href="styles.css">
+   </head>
+   <body>
+      <div class="container" style="width: 100%">
+         <img src="{{ plot }}" class="img-fluid" alt="plot">
+      </div>
+   </body>
+</html>
