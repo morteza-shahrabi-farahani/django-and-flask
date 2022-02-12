@@ -3,6 +3,7 @@ from django.http import HttpResponse
 # Create your views here.
 from listings.models import Listing
 from realtors.models import Realtor 
+from contacts.models import Contact
 from listings.choices import state_choices, bedroom_choices, price_choices
 from django.contrib import messages, auth
 from django.contrib.auth.models import User
@@ -58,4 +59,7 @@ def register(request):
         return render(request, 'accounts/register.html')
 
 def dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    user_contacts = Contact.objects.order_by('-contact_date').filter(user_id=request.user.id)
+
+    context = {'contacts': user_contacts}
+    return render(request, 'accounts/dashboard.html', context)
