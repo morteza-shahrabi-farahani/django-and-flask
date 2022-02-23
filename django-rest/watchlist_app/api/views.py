@@ -1,5 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+from watchlist_app.api.permissions import isAdminOrReadOnly
 from watchlist_app.api.serializers import ReviewSerializer, WatchListSerializer, StreamPlatformSerializer
 from ..models import Review, StreamPlatform, WatchList
 from rest_framework import status, generics
@@ -9,11 +11,26 @@ from rest_framework.views import APIView
 class ReviewCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
     
+    def get_queryset(self):
+        return Review.objects.all()
+    
     def perform_create(self, serializer):
         pk = self.kwargs.get('pk')
         movie = WatchList.objects.get(pk=pk)
         
-        serializer.save(watchlist=movie)
+        review_user = self.request.user
+        review_queryset = Review.objects.filter(review_user=review_user, watchlist=movie)
+        if review_queryset.exists():
+            raise ValidationError('You have already save review')
+        
+        if movie.totalReviews == 0:
+            movie.avgRate = serializer.validated_data['rating']
+        else:
+            movie.avgRate = ((movie.avgRate * movie.totalReviews) + serializer.validated_data['rating']) / (movie.totalReviews + 1)
+            
+        movie.totalReviews += 1
+        movie.save()
+        serializer.save(watchlist=movie, review_user=review_user)
 
 class ReviewList(generics.ListCreateAPIView):
     # queryset = Review.objects.all()
@@ -26,6 +43,7 @@ class ReviewList(generics.ListCreateAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [isAdminOrReadOnly]
 
 class StreamPlatformAV(APIView):
     def get(self, request):
