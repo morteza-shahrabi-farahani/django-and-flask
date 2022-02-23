@@ -2,10 +2,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from watchlist_app.api.permissions import isAdminOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from watchlist_app.api.serializers import ReviewSerializer, WatchListSerializer, StreamPlatformSerializer
 from ..models import Review, StreamPlatform, WatchList
 from rest_framework import status, generics
 from rest_framework.views import APIView
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 class ReviewCreate(generics.CreateAPIView):
@@ -35,6 +38,7 @@ class ReviewCreate(generics.CreateAPIView):
 class ReviewList(generics.ListCreateAPIView):
     # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         pk = self.kwargs['pk']
