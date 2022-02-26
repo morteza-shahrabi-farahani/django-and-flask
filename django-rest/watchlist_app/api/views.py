@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from watchlist_app.api.pagination import WatchListPagination
 from watchlist_app.api.permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
 from watchlist_app.api.serializers import ReviewSerializer, WatchListSerializer, StreamPlatformSerializer
 from ..models import Review, StreamPlatform, WatchList
@@ -107,6 +108,7 @@ class StreamDetailAV(APIView):
 class WatchListNew(generics.ListAPIView):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer
+    pagination_class = WatchListPagination
     # permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['platform__name']
